@@ -1,7 +1,12 @@
-const port = 3000;
-
 var express = require('express');
 var bodyParser = require('body-parser');
+var mysql = require('mysql');
+var fs = require('fs');
+
+// Load environment variables
+require('dotenv').config();
+
+const port = process.env.PORT;
 
 // Setup Express
 var app = express();
@@ -9,11 +14,17 @@ app.use(bodyParser.urlencoded({
 	extended: true
 }));
 
+// Setup MySQL
+var dbConnection = mysql.createConnection({
+	host: process.env.DB_HOST,
+	user: process.env.DB_USER,
+	password: process.env.DB_PASS,
+	database: process.env.DB_NAME
+});
+
 // Listen on port
-app.listen(port, function (err) {
-	if (err) {
-		return console.log(err);
-	}
+app.listen(port, function (error) {
+	if (error) throw error;
 	console.log('Server listening on port ' + port + '.');
 });
 
@@ -47,5 +58,8 @@ app.post('/api/stop_stream', function (req, res) {
 	// Stop transcode process
 	transcodeProcesses[req.body.name].kill('SIGTERM');
 	delete transcodeProcesses[req.body.name];
+	fs.unlink('./thumbnails/' + req.body.name + '.png', function (error) {
+		if (error) throw error;
+	});
 	console.log('Stream stopped.');
 });
