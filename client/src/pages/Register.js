@@ -41,11 +41,12 @@ export default class Register extends Component {
     .then(response => response.json())
     .then(responseJson => {
       if (responseJson.response === 'Registration successful') {
-        this.props.authenticate(true);
+        this.setState({ loading: false });
         this.props.history.push('/');
       }
     })
     .catch((error) => {
+      this.setState({ loading: false });
       console.error(error);
     });
   }

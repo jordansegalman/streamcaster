@@ -26,9 +26,29 @@ export default class Login extends Component {
 
   handleSubmit = event => {
     event.preventDefault();
-    this.setState({ isLoading: true });
-    this.props.authenticate(true);
-    this.props.history.push('/');
+    this.setState({ loading: true });
+    fetch('https://streamcaster.me/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: this.state.username,
+        password: this.state.password
+      })
+    })
+    .then(response => response.json())
+    .then(responseJson => {
+      if (responseJson.response === 'Login successful') {
+        this.setState({ loading: false });
+        this.props.authenticate(true);
+        this.props.history.push('/');
+      }
+    })
+    .catch((error) => {
+      this.setState({ loading: false });
+      console.error(error);
+    });
   }
 
   render() {

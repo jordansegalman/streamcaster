@@ -168,7 +168,7 @@ function login(username, password, res) {
                         return res.status(400).json({response: 'Invalid username or password'});
                 } else {
                         // Compare sent password hash to account password hash
-                        bcrypt.compare(password, result[0].password, function (err, result) {
+                        bcrypt.compare(password, results[0].password, function (err, result) {
                                 if (result === true) {
                                         console.log("User logged in.");
                                         return res.status(200).json({response: 'Login successful'});
