@@ -9,10 +9,12 @@ var bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const port = process.env.PORT;
-const saltRounds = 16;
+const saltRounds = 14;
+const crypto = require('crypto');
 
 // Setup Express
 var app = express();
+app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: true
 }));
@@ -39,10 +41,10 @@ app.listen(port, function (error) {
 app.post('/api/start_stream', function (req, res) {
 	if (!req.body || !req.body.name) {
 		// If request does not contain stream key
-		return res.status(400).send('Bad Request');
+		return res.status(400).end();
 	} else if (req.body.name != 'test') {
 		// If stream key invalid
-		return res.status(403).send('Forbidden');
+		return res.status(403).end();
 	}
 	// If stream key valid, start transcode process
 	const transcode = spawn('./transcode', [req.body.name, 'test']);
@@ -54,7 +56,7 @@ app.post('/api/start_stream', function (req, res) {
 	});
 	transcodeProcesses[req.body.name] = transcode;
 	console.log('Transcode process spawned.');
-	res.status(200).send('OK');
+	res.status(200).end();
 	console.log('Stream started.');
 });
 
@@ -72,15 +74,15 @@ app.post('/api/stop_stream', function (req, res) {
 // Called when user attempts registration
 app.post('/api/register', function (req, res) {
 	if (!req.body || !req.body.username || !req.body.password) {
-		return res.status(400).send('Invalid POST request');
+		return res.status(400).json({response: 'Invalid POST request'});
 	}
 	// Validate username
 	if (!validateUsername(req.body.username)) {
-		return res.status(400).send('Invalid username');
+		return res.status(400).json({response: 'Invalid username'});
 	}
 	// Validate password
 	if (!validatePassword(req.body.password)) {
-		return res.status(400).send('Invalid password');
+		return res.status(400).json({response: 'Invalid password'});
 	}
 	register(req.body.username, req.body.password, res);
 });
@@ -103,12 +105,12 @@ function validatePassword(password) {
 // Registers an account
 function register(username, password, res) {
 	// Check if username already exists
-	var sql = 'SELECT ?? FROM ?? WHERE ??=? OR ??=?';
+	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
 	var inserts = ['username', 'accounts', 'username', username];
 	dbConnection.query(sql, inserts, function (error, results) {
 		if (error) throw error;
 		if (results.length != 0) {
-			return res.status(400).send('Username exists');
+			return res.status(400).json({response: 'Username exists'});
 		} else {
 			// Hash password
 			bcrypt.hash(password, saltRounds, function (err, hash) {
@@ -119,7 +121,7 @@ function register(username, password, res) {
 				dbConnection.query(sql, inserts, function (error, results) {
 					if (error) throw error;
 					if (results.length != 0) {
-						return res.status(500).send('User ID collision');
+						return res.status(500).json({response: 'User ID collision'});
 					} else {
 						// Insert account in accounts table
 						var sql = 'INSERT INTO ?? SET ?';
@@ -127,10 +129,10 @@ function register(username, password, res) {
 						dbConnection.query(sql, inserts, function (error, results) {
 							if (error) throw error;
 							if (results.affectedRows != 1) {
-								return res.status(500).send('Registration error');
+								return res.status(500).json({response: 'Registration error'});
 							}
 							console.log('Account registered.');
-							return res.status(200).send('Registration successful');
+							return res.status(200).json({response: 'Registration successful'});
 						});
 					}
 				});
