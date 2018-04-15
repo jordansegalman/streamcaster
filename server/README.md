@@ -26,7 +26,7 @@ FLUSH PRIVILEGES;
 npm install
 ```
 
-3. Add variables PORT, DB_HOST, DB_USER, DB_PASS, and DB_NAME to .env
+3. Add variables PORT, DB_HOST, DB_USER, DB_PASS, DB_NAME, COOKIE_NAME, COOKIE_SECRET, and COOKIE_DOMAIN to .env
 
 ## Running
 

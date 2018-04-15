@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
-import Routes from './Routes';
+import Routes from './routes';
 import './App.css';
 
 class App extends Component {
@@ -10,7 +10,7 @@ class App extends Component {
     super(props);
 
     this.state = {
-      authenticated: false
+      authenticated: false,
     };
   }
 
@@ -18,8 +18,25 @@ class App extends Component {
     this.setState({ authenticated: auth });
   }
 
-  handleLogout = event => {
-    this.authenticate(false);
+  checkAuthenticated() {
+    fetch('https://streamcaster.me/api/check_authenticated', {
+      credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(responseJson => {
+      if (responseJson.response === 'Authenticated') {
+        this.authenticate(true);
+      } else {
+        this.authenticate(false);
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+  }
+
+  componentDidMount() {
+    this.checkAuthenticated();
   }
 
   render() {
@@ -29,7 +46,7 @@ class App extends Component {
     };
     return (
       <div className="App">
-        <Navbar fluid collapseOnSelect>
+        <Navbar fluid inverse collapseOnSelect>
           <Navbar.Header>
             <Navbar.Brand>
               <Link to="/">Streamcaster</Link>
@@ -39,7 +56,11 @@ class App extends Component {
           <Navbar.Collapse>
             <Nav pullRight>
               {this.state.authenticated
-                ? <NavItem onClick={this.handleLogout}>Logout</NavItem>
+                ? <Fragment>
+                    <LinkContainer to="/account">
+                      <NavItem>Account</NavItem>
+                    </LinkContainer>
+                  </Fragment>
                 : <Fragment>
                     <LinkContainer to="/login">
                       <NavItem>Log In</NavItem>

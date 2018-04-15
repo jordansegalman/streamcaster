@@ -4,6 +4,8 @@ var mysql = require('mysql');
 var fs = require('fs');
 var validator = require('validator');
 var bcrypt = require('bcrypt');
+var session = require('express-session');
+var morgan = require('morgan');
 
 // Load environment variables
 require('dotenv').config();
@@ -17,6 +19,17 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: true
+}));
+app.use(morgan('tiny'));
+
+// Setup session
+app.set('trust proxy', 1);
+app.use(session({
+	name: process.env.COOKIE_NAME,
+	secret: process.env.COOKIE_SECRET,
+	resave: false,
+	saveUninitialized: false,
+	cookie: { domain: process.env.COOKIE_DOMAIN, httpOnly: true, secure: true, maxAge: 31536000000 }
 }));
 
 // Setup MySQL
@@ -87,10 +100,14 @@ app.post('/api/register', function (req, res) {
 	register(req.body.username, req.body.password, res);
 });
 
-// Caled when user attempts to log in
+// Called when user attempts to log in
 app.post('/api/login', function (req, res) {
 	if (!req.body || !req.body.username || !req.body.password) {
 		return res.status(400).json({response: 'Invalid POST request'});
+	}
+	// If session authenticated
+	if (req.session && req.session.authenticated && req.session.authenticated === true) {
+		return res.status(400).json({response: 'Already logged in'});
 	}
 	// Validate username
 	if (!validateUsername(req.body.username)) {
@@ -100,7 +117,41 @@ app.post('/api/login', function (req, res) {
 	if (!validatePassword(req.body.password)) {
 		return res.status(400).json({response: 'Invalid password'});
 	}
-	login(req.body.username, req.body.password, res);
+	login(req.body.username, req.body.password, req, res);
+});
+
+// Checks if session is authenticated
+app.get('/api/check_authenticated', function (req, res) {
+	// If session authenticated
+	if (req.session && req.session.authenticated && req.session.authenticated === true) {
+		return res.status(200).json({response: 'Authenticated'});
+	}
+	return res.status(400).json({response: 'Not authenticated'});
+});
+
+// Called when user attempts to log out
+app.get('/api/logout', function (req, res) {
+	// If session not authenticated
+	if (!req.session || !req.session.authenticated || req.session.authenticated !== true) {
+		return res.status(400).json({response: 'Not logged in'});
+	}
+	logout(req, res);
+});
+
+// Called when user attempts to delete account
+app.post('/api/delete_account', function (req, res) {
+	if (!req.body || !req.body.password) {
+		return res.status(400).json({response: 'Invalid POST request'});
+	}
+	// If session not authenticated
+	if (!req.session || !req.session.authenticated || req.session.authenticated !== true) {
+		return res.status(400).json({response: 'Not logged in'});
+	}
+	// Validate password
+	if (!validatePassword(req.body.password)) {
+		return res.status(400).json({response: 'Invalid password'});
+	}
+	deleteAccount(req.body.password, req, res);
 });
 
 // Validates a user ID
@@ -158,24 +209,74 @@ function register(username, password, res) {
 }
 
 // Logs a user in
-function login(username, password, res) {
-        // Get user ID and password hash for username
-        var sql = 'SELECT ??,?? FROM ?? WHERE ??=?';
-        var inserts = ['uid', 'password', 'accounts', 'username', username];
-        dbConnection.query(sql, inserts, function (error, results) {
-                if (error) throw error;
-                if (results.length != 1) {
-                        return res.status(400).json({response: 'Invalid username or password'});
-                } else {
-                        // Compare sent password hash to account password hash
-                        bcrypt.compare(password, results[0].password, function (err, result) {
-                                if (result === true) {
-                                        console.log("User logged in.");
-                                        return res.status(200).json({response: 'Login successful'});
-                                } else {
-                                        return res.status(400).json({response: 'Invalid username or password'});
-                                }
-                        });
-                }
-        });
+function login(username, password, req, res) {
+	// Get user ID and password hash for username
+	var sql = 'SELECT ??,?? FROM ?? WHERE ??=?';
+	var inserts = ['uid', 'password', 'accounts', 'username', username];
+	dbConnection.query(sql, inserts, function (error, results) {
+		if (error) throw error;
+		if (results.length != 1) {
+			return res.status(400).json({response: 'Invalid username or password'});
+		} else {
+			// Compare sent password hash to account password hash
+			bcrypt.compare(password, results[0].password, function (err, result) {
+				if (result === true) {
+					// Setup session
+					req.session.authenticated = true;
+					req.session.uid = results[0].uid;
+					req.session.username = username;
+					console.log("User logged in.");
+					return res.status(200).json({response: 'Login successful'});
+				} else {
+					return res.status(400).json({response: 'Invalid username or password'});
+				}
+			});
+		}
+	});
+}
+
+// Logs a user out
+function logout(req, res) {
+	// Destroy the session
+	req.session.destroy(function (err) {
+		if (err) throw err;
+		console.log('User logged out.');
+		return res.status(200).json({response: 'Logout successful'});
+	});
+}
+
+// Deletes an account
+function deleteAccount(password, req, res) {
+	// Get password hash for user ID
+	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
+	var inserts = ['password', 'accounts', 'uid', req.session.uid];
+	dbConnection.query(sql, inserts, function (error, results) {
+		if (error) throw error;
+		if (results.length != 1) {
+			return res.status(500).json({response: 'User ID not found'});
+		} else {
+			// Compare sent password hash to account password hash
+			bcrypt.compare(password, results[0].password, function (err, result) {
+				if (result === true) {
+					// Delete account
+					var sql = 'DELETE FROM ?? WHERE ??=?';
+					var inserts = ['accounts', 'uid', req.session.uid];
+					dbConnection.query(sql, inserts, function (error, results) {
+						if (error) throw error;
+						if (results.affectedRows != 1) {
+							return res.status(500).json({response: 'Account deletion error'});
+						}
+						// Destroy the session
+						req.session.destroy(function (err) {
+							if (err) throw err;
+							console.log('Account deleted.');
+							return res.status(200).json({response: 'Account deletion successful'});
+						});
+					});
+				} else {
+					return res.status(400).json({response: 'Invalid password'});
+				}
+			});
+		}
+	});
 }

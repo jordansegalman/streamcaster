@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
-import LoaderButton from '../components/LoaderButton';
+import LoadingButton from './LoadingButton';
 import './Register.css';
 
 export default class Register extends Component {
@@ -40,8 +40,8 @@ export default class Register extends Component {
     })
     .then(response => response.json())
     .then(responseJson => {
+      this.setState({ loading: false });
       if (responseJson.response === 'Registration successful') {
-        this.setState({ loading: false });
         this.props.history.push('/');
       }
     })
@@ -61,6 +61,7 @@ export default class Register extends Component {
               autoFocus
               type="text"
               value={this.state.username}
+              placeholder="Username"
               onChange={this.handleChange}
             />
           </FormGroup>
@@ -69,6 +70,7 @@ export default class Register extends Component {
             <FormControl
               type="password"
               value={this.state.password}
+              placeholder="Password"
               onChange={this.handleChange}
             />
           </FormGroup>
@@ -77,10 +79,11 @@ export default class Register extends Component {
             <FormControl
               type="password"
               value={this.state.confirmPassword}
+              placeholder="Confirm Password"
               onChange={this.handleChange}
             />
           </FormGroup>
-          <LoaderButton
+          <LoadingButton
             block
             bsSize="large"
             disabled={!this.validateForm()}
