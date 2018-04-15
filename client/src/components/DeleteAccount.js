@@ -65,7 +65,6 @@ export default class DeleteAccount extends Component {
             />
           </FormGroup>
           <LoadingButton
-            block
             bsSize="large"
             bsStyle="danger"
             disabled={!this.validateForm()}

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import LoadingButton from './LoadingButton';
+import StreamKeyModal from './StreamKeyModal';
 import './Account.css';
 
 export default class Account extends Component {
@@ -41,6 +42,7 @@ export default class Account extends Component {
   render() {
     return (
           <div>
+            <StreamKeyModal />
             <LoadingButton
               bsSize="large"
               type="button"

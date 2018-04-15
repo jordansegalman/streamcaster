@@ -353,7 +353,9 @@ function changeStreamKey(req, res) {
 			return res.status(500).json({response: 'Stream key not found'});
 		}
 		// Stop current stream
-		stopStream(results[0].stream_key);
+		if (streams.hasOwnProperty(results[0].stream_key)) {
+			stopStream(results[0].stream_key);
+		}
 		// Generate new stream key and check if already exists
 		var newStreamKey = crypto.randomBytes(32).toString('hex');
 		var sql = 'SELECT ?? FROM ?? WHERE ??=?';
