@@ -40,10 +40,6 @@ var dbConnection = mysql.createConnection({
 	database: process.env.DB_NAME
 });
 
-// Setup transcode child processes
-const { spawn } = require('child_process');
-var transcodeProcesses = {};
-
 // Listen on port
 app.listen(port, function (error) {
 	if (error) throw error;
@@ -55,33 +51,15 @@ app.post('/api/start_stream', function (req, res) {
 	if (!req.body || !req.body.name) {
 		// If request does not contain stream key
 		return res.status(400).end();
-	} else if (req.body.name != 'test') {
-		// If stream key invalid
-		return res.status(403).end();
 	}
-	// If stream key valid, start transcode process
-	const transcode = spawn('./transcode', [req.body.name, 'test']);
-	transcode.on('error', () => {
-		console.log('Transcode process error.');
-	});
-	transcode.on('exit', () => {
-		console.log('Transcode process terminated.');
-	});
-	transcodeProcesses[req.body.name] = transcode;
-	console.log('Transcode process spawned.');
-	res.status(200).end();
-	console.log('Stream started.');
+	startStream(req.body.name, res);
 });
 
 // Called when a stream is stopped
 app.post('/api/stop_stream', function (req, res) {
-	// Stop transcode process
-	transcodeProcesses[req.body.name].kill('SIGTERM');
-	delete transcodeProcesses[req.body.name];
-	fs.unlink('./thumbnails/' + req.body.name + '.png', function (error) {
-		if (error) throw error;
-	});
-	console.log('Stream stopped.');
+	if (streams.hasOwnProperty(req.body.name)) {
+		stopStream(req.body.name);
+	}
 });
 
 // Called when user attempts registration
@@ -154,6 +132,24 @@ app.post('/api/delete_account', function (req, res) {
 	deleteAccount(req.body.password, req, res);
 });
 
+// Called when user views stream key
+app.get('/api/get_stream_key', function (req, res) {
+	// If session not authenticated
+	if (!req.session || !req.session.authenticated || req.session.authenticated !== true) {
+		return res.status(400).json({response: 'Not logged in'});
+	}
+	getStreamKey(req, res);
+});
+
+// Called when user attempts to change stream key
+app.get('/api/change_stream_key', function (req, res) {
+	// If session not authenticated
+	if (!req.session || !req.session.authenticated || req.session.authenticated !== true) {
+		return res.status(400).json({response: 'Not logged in'});
+	}
+	changeStreamKey(req, res);
+});
+
 // Validates a user ID
 function validateUid(uid) {
 	return !validator.isEmpty(uid) && validator.isHexadecimal(uid) && validator.isLength(uid, {min: 16, max: 16});
@@ -169,6 +165,60 @@ function validatePassword(password) {
 	return !validator.isEmpty(password) && validator.isAscii(password) && validator.isLength(password, {min: 8, max: 64});
 }
 
+// Stream objects
+const { spawn } = require('child_process');
+var streams = {};
+
+// Initializes new stream
+function startStream(streamKey, res) {
+	if (streams.hasOwnProperty(streamKey)) {
+		// If already streaming
+		return res.status(403).end();
+	}
+	// Get username for stream key
+	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
+	var inserts = ['username', 'accounts', 'stream_key', streamKey];
+	dbConnection.query(sql, inserts, function (error, results) {
+		if (error) throw error;
+		if (results.length != 1) {
+			return res.status(403).end();
+		}
+		// Stream key valid, start transcode process
+		const t = spawn('./transcode', [streamKey, results[0].username]);
+		t.on('error', () => {
+			console.log('Transcode process error.');
+		});
+		t.on('exit', () => {
+			console.log('Transcode process terminated.');
+		});
+		// Add stream to streams object
+		streams[streamKey] = {username: results[0].username, transcode: t};
+		console.log('Transcode process spawned.');
+		res.status(200).end();
+		console.log('Stream started.');
+	});
+}
+
+// Terminates stream
+function stopStream(streamKey) {
+	// Stop transcode process
+	streams[streamKey].transcode.kill('SIGTERM');
+	// Check if stream thumbnail exists
+	fs.access('./thumbnails/' + streams[streamKey].username + '.png', fs.constants.F_OK, (err) => {
+		if (!err) {
+			// Delete stream thumbnail
+			fs.unlink('./thumbnails/' + streams[streamKey].username + '.png', (err) => {
+				if (err) throw err;
+				delete streams[streamKey];
+				console.log('Stream stopped.');
+			});
+		} else {
+			delete streams[streamKey];
+			console.log('Stream stopped.');
+		}
+	});
+}
+
 // Registers an account
 function register(username, password, res) {
 	// Check if username already exists
@@ -178,33 +228,32 @@ function register(username, password, res) {
 		if (error) throw error;
 		if (results.length != 0) {
 			return res.status(400).json({response: 'Username exists'});
-		} else {
-			// Hash password
-			bcrypt.hash(password, saltRounds, function (err, hash) {
-				// Generate user ID and check if already exists
-				var uid = crypto.randomBytes(8).toString('hex');
-				var sql = 'SELECT ?? FROM ?? WHERE ??=?';
-				var inserts = ['uid', 'accounts', 'uid', uid];
+		}
+		// Hash password
+		bcrypt.hash(password, saltRounds, function (err, hash) {
+			// Generate user ID and stream key and check if already exist
+			var uid = crypto.randomBytes(8).toString('hex');
+			var streamKey = crypto.randomBytes(32).toString('hex');
+			var sql = 'SELECT ?? FROM ?? WHERE ??=? OR ??=?';
+			var inserts = ['uid', 'accounts', 'uid', uid, 'stream_key', streamKey];
+			dbConnection.query(sql, inserts, function (error, results) {
+				if (error) throw error;
+				if (results.length != 0) {
+					return res.status(500).json({response: 'Collision'});
+				}
+				// Insert account in accounts table
+				var sql = 'INSERT INTO ?? SET ?';
+				var inserts = ['accounts', {'uid': uid, 'username': username, 'password': hash, 'stream_key': streamKey}];
 				dbConnection.query(sql, inserts, function (error, results) {
 					if (error) throw error;
-					if (results.length != 0) {
-						return res.status(500).json({response: 'User ID collision'});
-					} else {
-						// Insert account in accounts table
-						var sql = 'INSERT INTO ?? SET ?';
-						var inserts = ['accounts', {'uid': uid, 'username': username, 'password': hash}];
-						dbConnection.query(sql, inserts, function (error, results) {
-							if (error) throw error;
-							if (results.affectedRows != 1) {
-								return res.status(500).json({response: 'Registration error'});
-							}
-							console.log('Account registered.');
-							return res.status(200).json({response: 'Registration successful'});
-						});
+					if (results.affectedRows != 1) {
+						return res.status(500).json({response: 'Registration error'});
 					}
+					console.log('Account registered.');
+					return res.status(200).json({response: 'Registration successful'});
 				});
 			});
-		}
+		});
 	});
 }
 
@@ -217,21 +266,20 @@ function login(username, password, req, res) {
 		if (error) throw error;
 		if (results.length != 1) {
 			return res.status(400).json({response: 'Invalid username or password'});
-		} else {
-			// Compare sent password hash to account password hash
-			bcrypt.compare(password, results[0].password, function (err, result) {
-				if (result === true) {
-					// Setup session
-					req.session.authenticated = true;
-					req.session.uid = results[0].uid;
-					req.session.username = username;
-					console.log("User logged in.");
-					return res.status(200).json({response: 'Login successful'});
-				} else {
-					return res.status(400).json({response: 'Invalid username or password'});
-				}
-			});
 		}
+		// Compare sent password hash to account password hash
+		bcrypt.compare(password, results[0].password, function (err, result) {
+			if (result === true) {
+				// Setup session
+				req.session.authenticated = true;
+				req.session.uid = results[0].uid;
+				req.session.username = username;
+				console.log('User logged in.');
+				return res.status(200).json({response: 'Login successful'});
+			} else {
+				return res.status(400).json({response: 'Invalid username or password'});
+			}
+		});
 	});
 }
 
@@ -254,29 +302,78 @@ function deleteAccount(password, req, res) {
 		if (error) throw error;
 		if (results.length != 1) {
 			return res.status(500).json({response: 'User ID not found'});
-		} else {
-			// Compare sent password hash to account password hash
-			bcrypt.compare(password, results[0].password, function (err, result) {
-				if (result === true) {
-					// Delete account
-					var sql = 'DELETE FROM ?? WHERE ??=?';
-					var inserts = ['accounts', 'uid', req.session.uid];
-					dbConnection.query(sql, inserts, function (error, results) {
-						if (error) throw error;
-						if (results.affectedRows != 1) {
-							return res.status(500).json({response: 'Account deletion error'});
-						}
-						// Destroy the session
-						req.session.destroy(function (err) {
-							if (err) throw err;
-							console.log('Account deleted.');
-							return res.status(200).json({response: 'Account deletion successful'});
-						});
-					});
-				} else {
-					return res.status(400).json({response: 'Invalid password'});
-				}
-			});
 		}
+		// Compare sent password hash to account password hash
+		bcrypt.compare(password, results[0].password, function (err, result) {
+			if (result === true) {
+				// Delete account
+				var sql = 'DELETE FROM ?? WHERE ??=?';
+				var inserts = ['accounts', 'uid', req.session.uid];
+				dbConnection.query(sql, inserts, function (error, results) {
+					if (error) throw error;
+					if (results.affectedRows != 1) {
+						return res.status(500).json({response: 'Account deletion error'});
+					}
+					// Destroy the session
+					req.session.destroy(function (err) {
+						if (err) throw err;
+						console.log('Account deleted.');
+						return res.status(200).json({response: 'Account deletion successful'});
+					});
+				});
+			} else {
+				return res.status(400).json({response: 'Invalid password'});
+			}
+		});
+	});
+}
+
+// Gets stream key of an account
+function getStreamKey(req, res) {
+	// Get stream key for user ID
+	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
+	var inserts = ['stream_key', 'accounts', 'uid', req.session.uid];
+	dbConnection.query(sql, inserts, function (error, results) {
+		if (error) throw error;
+		if (results.length != 1) {
+			return res.status(500).json({response: 'Stream key not found'});
+		}
+		return res.status(200).json({response: 'Success', streamKey: results[0].stream_key});
+	});
+}
+
+// Changes stream key of an account
+function changeStreamKey(req, res) {
+	// Get stream key for user ID
+	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
+	var inserts = ['stream_key', 'accounts', 'uid', req.session.uid];
+	dbConnection.query(sql, inserts, function (error, results) {
+		if (error) throw error;
+		if (results.length != 1) {
+			return res.status(500).json({response: 'Stream key not found'});
+		}
+		// Stop current stream
+		stopStream(results[0].stream_key);
+		// Generate new stream key and check if already exists
+		var newStreamKey = crypto.randomBytes(32).toString('hex');
+		var sql = 'SELECT ?? FROM ?? WHERE ??=?';
+		var inserts = ['stream_key', 'accounts', 'stream_key', newStreamKey];
+		dbConnection.query(sql, inserts, function (error, results) {
+			if (error) throw error;
+			if (results.length != 0) {
+				return res.status(500).json({response: 'Stream key collision'});
+			}
+			// Change stream key for user ID
+			var sql = 'UPDATE ?? SET ??=? WHERE ??=?';
+			var inserts = ['accounts', 'stream_key', newStreamKey, 'uid', req.session.uid];
+			dbConnection.query(sql, inserts, function (error, results) {
+				if (error) throw error;
+				if (results.affectedRows != 1) {
+					return res.status(500).json({response: 'Error changing stream key'});
+				}
+				console.log('Stream key changed.');
+				return res.status(200).json({response: 'Success', streamKey: newStreamKey});
+			});
+		});
 	});
 }

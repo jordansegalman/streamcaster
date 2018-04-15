@@ -14,7 +14,7 @@
 ```
 CREATE DATABASE database;
 USE database;
-CREATE TABLE accounts (uid VARCHAR(16) NOT NULL, username VARCHAR(32) NOT NULL, password VARCHAR(64) NOT NULL, PRIMARY KEY (uid), UNIQUE KEY uid (uid), UNIQUE KEY username (username));
+CREATE TABLE accounts (uid VARCHAR(16) NOT NULL, username VARCHAR(32) NOT NULL, password VARCHAR(64) NOT NULL, stream_key VARCHAR(64) NOT NULL, PRIMARY KEY (uid), UNIQUE KEY uid (uid), UNIQUE KEY username (username), UNIQUE KEY stream_key (stream_key));
 CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
 GRANT ALL ON database.* TO 'username'@'localhost';
 FLUSH PRIVILEGES;
