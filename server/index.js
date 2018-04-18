@@ -5,6 +5,7 @@ var fs = require('fs');
 var validator = require('validator');
 var bcrypt = require('bcrypt');
 var session = require('express-session');
+var url = require('url');
 var morgan = require('morgan');
 
 // Load environment variables
@@ -50,7 +51,7 @@ app.listen(port, function (error) {
 app.post('/api/start_stream', function (req, res) {
 	if (!req.body || !req.body.name) {
 		// If request does not contain stream key
-		return res.status(400).end();
+		return res.sendStatus(400);
 	}
 	startStream(req.body.name, res);
 });
@@ -150,6 +151,22 @@ app.get('/api/change_stream_key', function (req, res) {
 	changeStreamKey(req, res);
 });
 
+// Called when displaying all streams
+app.get('/api/get_streams', function (req, res) {
+	getStreams(res);
+});
+
+// Called when request made for stream thumbnail
+app.get("/thumbnails/*.png", function (req, res) {
+	res.sendFile(__dirname + url.parse(req.url).pathname, function (err) {
+		if (err) {
+			res.sendFile(__dirname + '/default_thumbnail.png', function (err) {
+				if (err) throw err;
+			});
+		}
+	});
+});
+
 // Validates a user ID
 function validateUid(uid) {
 	return !validator.isEmpty(uid) && validator.isHexadecimal(uid) && validator.isLength(uid, {min: 16, max: 16});
@@ -173,7 +190,7 @@ var streams = {};
 function startStream(streamKey, res) {
 	if (streams.hasOwnProperty(streamKey)) {
 		// If already streaming
-		return res.status(403).end();
+		return res.sendStatus(403);
 	}
 	// Get username for stream key
 	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
@@ -181,7 +198,7 @@ function startStream(streamKey, res) {
 	dbConnection.query(sql, inserts, function (error, results) {
 		if (error) throw error;
 		if (results.length != 1) {
-			return res.status(403).end();
+			return res.sendStatus(403);
 		}
 		// Stream key valid, start transcode process
 		const t = spawn('./transcode', [streamKey, results[0].username]);
@@ -194,7 +211,7 @@ function startStream(streamKey, res) {
 		// Add stream to streams object
 		streams[streamKey] = {username: results[0].username, transcode: t};
 		console.log('Transcode process spawned.');
-		res.status(200).end();
+		res.sendStatus(200);
 		console.log('Stream started.');
 	});
 }
@@ -378,4 +395,15 @@ function changeStreamKey(req, res) {
 			});
 		});
 	});
+}
+
+// Returns the usernames of everyone currently streaming
+function getStreams(res) {
+	var u = [];
+	for (var streamKey in streams) {
+		if (streams.hasOwnProperty(streamKey)) {
+			u.push(streams[streamKey].username);
+		}
+	}
+	return res.status(200).json({response: 'Success', usernames: u});
 }

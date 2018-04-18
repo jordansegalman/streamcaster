@@ -26,9 +26,7 @@ export default class StreamKeyModal extends Component {
     .then(response => response.json())
     .then(responseJson => {
       if (responseJson.response === 'Success') {
-        this.setState({ streamKey: responseJson.streamKey });
-        this.setState({ show: true });
-        this.setState({ getLoading: false });
+        this.setState({ streamKey: responseJson.streamKey, show: true, getLoading: false });
       }
     })
     .catch((error) => {
@@ -45,8 +43,7 @@ export default class StreamKeyModal extends Component {
     .then(response => response.json())
     .then(responseJson => {
       if (responseJson.response === 'Success') {
-        this.setState({ streamKey: responseJson.streamKey });
-        this.setState({ changeLoading: false });
+        this.setState({ streamKey: responseJson.streamKey, changeLoading: false });
       }
     })
     .catch((error) => {
@@ -56,8 +53,7 @@ export default class StreamKeyModal extends Component {
   }
 
   handleClose() {
-    this.setState({ streamKey: "" });
-    this.setState({ show: false });
+    this.setState({ streamKey: "", show: false });
   }
 
   render() {

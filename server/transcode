@@ -19,13 +19,13 @@ if [ $width -ge 1920 ] && [ $height -ge 1080 ]; then
 			-c:v libx264 -x264opts keyint=120:no-scenecut -s 1280x720 -r 60 -b:v 4500k -profile:v main -preset veryfast -c:a libfdk_aac -b:a 128k -sws_flags bilinear -hls_list_size 6 -f flv rtmp://localhost/hls/"$2"_72060 \
 			-c:v libx264 -x264opts keyint=60:no-scenecut -s 1280x720 -r 30 -b:v 4000k -profile:v main -preset veryfast -c:a libfdk_aac -b:a 128k -sws_flags bilinear -hls_list_size 6 -f flv rtmp://localhost/hls/"$2"_72030 \
 			-c:v libx264 -x264opts keyint=60:no-scenecut -s 852x480 -r 30 -b:v 2000k -profile:v main -preset veryfast -c:a libfdk_aac -b:a 96k -sws_flags bilinear -hls_list_size 6 -f flv rtmp://localhost/hls/"$2"_48030 \
-			-vf fps=1/60 -y -update 1 ./thumbnails/$2.png &
+			-vf fps=1/10 -y -update 1 ./thumbnails/$2.png &
 	else
 		/usr/local/nginx/ffmpeg/bin/ffmpeg -i rtmp://localhost/stream/$1 \
 			-c copy -f flv rtmp://localhost/hls/"$2"_108030 \
 			-c:v libx264 -x264opts keyint=60:no-scenecut -s 1280x720 -r 30 -b:v 4000k -profile:v main -preset veryfast -c:a libfdk_aac -b:a 128k -sws_flags bilinear -hls_list_size 6 -f flv rtmp://localhost/hls/"$2"_72030 \
 			-c:v libx264 -x264opts keyint=60:no-scenecut -s 852x480 -r 30 -b:v 2000k -profile:v main -preset veryfast -c:a libfdk_aac -b:a 96k -sws_flags bilinear -hls_list_size 6 -f flv rtmp://localhost/hls/"$2"_48030 \
-			-vf fps=1/30 -y -update 1 ./thumbnails/$2.png &
+			-vf fps=1/10 -y -update 1 ./thumbnails/$2.png &
 	fi
 elif [ $width -ge 1280 ] && [ $height -ge 720 ]; then
 	if [ $frameRate -ge 60 ]; then
@@ -33,17 +33,17 @@ elif [ $width -ge 1280 ] && [ $height -ge 720 ]; then
 			-c copy -f flv rtmp://localhost/hls/"$2"_72060 \
 			-c:v libx264 -x264opts keyint=60:no-scenecut -s 1280x720 -r 30 -b:v 4000k -profile:v main -preset veryfast -c:a libfdk_aac -b:a 128k -sws_flags bilinear -hls_list_size 6 -f flv rtmp://localhost/hls/"$2"_72030 \
 			-c:v libx264 -x264opts keyint=60:no-scenecut -s 852x480 -r 30 -b:v 2000k -profile:v main -preset veryfast -c:a libfdk_aac -b:a 96k -sws_flags bilinear -hls_list_size 6 -f flv rtmp://localhost/hls/"$2"_48030 \
-			-vf fps=1/60 -y -update 1 ./thumbnails/$2.png &
+			-vf fps=1/10 -y -update 1 ./thumbnails/$2.png &
 	else
 		/usr/local/nginx/ffmpeg/bin/ffmpeg -i rtmp://localhost/stream/$1 \
 			-c copy -f flv rtmp://localhost/hls/"$2"_72030 \
 			-c:v libx264 -x264opts keyint=60:no-scenecut -s 852x480 -r 30 -b:v 2000k -profile:v main -preset veryfast -c:a libfdk_aac -b:a 96k -sws_flags bilinear -hls_list_size 6 -f flv rtmp://localhost/hls/"$2"_48030 \
-			-vf fps=1/30 -y -update 1 ./thumbnails/$2.png &
+			-vf fps=1/10 -y -update 1 ./thumbnails/$2.png &
 	fi
 else
 	/usr/local/nginx/ffmpeg/bin/ffmpeg -i rtmp://localhost/stream/$1 \
 		-c copy -f flv rtmp://localhost/hls/"$2"_48030 \
-		-vf fps=1/30 -y -update 1 ./thumbnails/$2.png &
+		-vf fps=1/10 -y -update 1 ./thumbnails/$2.png &
 fi
 
 wait
