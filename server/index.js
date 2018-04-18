@@ -156,6 +156,30 @@ app.get('/api/get_streams', function (req, res) {
 	getStreams(res);
 });
 
+// Called when viewing individual stream
+app.post('/api/check_user_exists', function (req, res) {
+	if (!req.body || !req.body.username) {
+		return res.status(400).json({response: 'Invalid POST request'});
+	}
+	// Validate username
+	if (!validateUsername(req.body.username)) {
+		return res.status(400).json({response: 'Invalid username'});
+	}
+	checkUserExists(req.body.username, req, res);
+});
+
+// Called when viewing individual stream
+app.post('/api/check_user_live', function (req, res) {
+	if (!req.body || !req.body.username) {
+		return res.status(400).json({response: 'Invalid POST request'});
+	}
+	// Validate username
+	if (!validateUsername(req.body.username)) {
+		return res.status(400).json({response: 'Invalid username'});
+	}
+	checkUserLive(req.body.username, req, res);
+});
+
 // Called when request made for stream thumbnail
 app.get("/thumbnails/*.png", function (req, res) {
 	res.sendFile(__dirname + url.parse(req.url).pathname, function (err) {
@@ -406,4 +430,27 @@ function getStreams(res) {
 		}
 	}
 	return res.status(200).json({response: 'Success', usernames: u});
+}
+
+// Checks if a user exists
+function checkUserExists(username, req, res) {
+	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
+	var inserts = ['username', 'accounts', 'username', username];
+	dbConnection.query(sql, inserts, function (error, results) {
+		if (error) throw error;
+		if (results.length != 1) {
+			return res.status(400).json({response: 'User does not exist'});
+		}
+		return res.status(200).json({response: 'User exists'});
+	});
+}
+
+// Checks if a user is live
+function checkUserLive(username, req, res) {
+	for (var streamKey in streams) {
+		if (streams.hasOwnProperty(streamKey) && streams[streamKey].username === username) {
+			return res.status(200).json({response: 'User live'});
+		}
+	}
+	return res.status(400).json({response: 'User is not live'});
 }

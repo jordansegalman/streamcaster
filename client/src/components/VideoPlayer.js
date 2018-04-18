@@ -6,7 +6,9 @@ import 'video.js/dist/video-js.css';
 export default class VideoPlayer extends Component {
   componentDidMount() {
     this.player = videojs(this.videoNode, this.props, function onPlayerReady() {
-      console.log('onPlayerReady', this);
+      this.on('error', function () {
+        alert(this.error().message);
+      });
     });
   }
 
