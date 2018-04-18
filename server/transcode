@@ -1,10 +1,6 @@
 #!/bin/bash
 
-onTerm() {
-	pkill -KILL -P $$
-}
-
-trap 'onTerm' TERM
+trap "pkill -KILL -P $$" TERM
 
 streamInfo=$(/usr/local/nginx/ffmpeg/bin/ffprobe -v error -select_streams v:0 -show_entries stream=width,height,avg_frame_rate rtmp://localhost/stream/"$1")
 width=$(echo "$streamInfo" | grep width | cut -d '=' -f 2)

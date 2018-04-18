@@ -201,7 +201,7 @@ function startStream(streamKey, res) {
 			return res.sendStatus(403);
 		}
 		// Stream key valid, start transcode process
-		const t = spawn('./transcode', [streamKey, results[0].username]);
+		const t = spawn('./transcode', [streamKey, results[0].username], { stdio: 'ignore' });
 		t.on('error', () => {
 			console.log('Transcode process error.');
 		});
