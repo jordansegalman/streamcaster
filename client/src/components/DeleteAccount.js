@@ -40,7 +40,7 @@ export default class DeleteAccount extends Component {
     .then(responseJson => {
       this.setState({ loading: false });
       if (responseJson.response === 'Account deletion successful') {
-        this.props.authenticate(false);
+        this.props.deauthenticate();
         this.props.history.push('/');
       }
     })

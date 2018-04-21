@@ -1,4 +1,11 @@
-#chat {
-  background-color: #000000;
-  color: #ffffff;
+textarea {
+  resize: none;
+}
+
+.panel-body {
+  overflow-x: hidden;
+  overflow-y: auto;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column-reverse;
 }

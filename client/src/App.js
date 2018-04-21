@@ -11,11 +11,16 @@ class App extends Component {
 
     this.state = {
       authenticated: false,
+      username: ''
     };
   }
 
-  authenticate = auth => {
-    this.setState({ authenticated: auth });
+  authenticate = u => {
+    this.setState({ authenticated: true, username: u });
+  }
+
+  deauthenticate = () => {
+    this.setState({ authenticated: false, username: '' });
   }
 
   checkAuthenticated() {
@@ -25,9 +30,9 @@ class App extends Component {
     .then(response => response.json())
     .then(responseJson => {
       if (responseJson.response === 'Authenticated') {
-        this.authenticate(true);
+        this.authenticate(responseJson.username);
       } else {
-        this.authenticate(false);
+        this.deauthenticate();
       }
     })
     .catch((error) => {
@@ -42,7 +47,9 @@ class App extends Component {
   render() {
     const childProps = {
       authenticated: this.state.authenticated,
-      authenticate: this.authenticate
+      username: this.state.username,
+      authenticate: this.authenticate,
+      deauthenticate: this.deauthenticate
     };
     return (
       <div className="App">

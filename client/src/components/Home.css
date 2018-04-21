@@ -1,7 +1,12 @@
+h1 {
+  text-align: center;
+}
+
 .thumbnail {
-  background-color: #000000;
+  background-color: #191919;
+  border-color: #222;
 }
 
 .thumbnail h3 {
-  color: #ffffff;
+  color: white;
 }

@@ -48,12 +48,12 @@ var httpServer = http.createServer(app);
 // Setup Socket.IO
 var io = require('socket.io')(httpServer);
 io.on('connection', (socket) => {
-	socket.on('joinRoom', (room, fn) => {
-		socket.join(room);
+	socket.on('joinStream', (stream, fn) => {
+		socket.join(stream);
 		fn();
 	});
 	socket.on('message', (data) => {
-		io.to(data.room).emit('message', data.message);
+		io.to(data.stream).emit('message', {username: data.username, message: data.message});
 	});
 });
 
@@ -119,7 +119,7 @@ app.post('/api/login', function (req, res) {
 app.get('/api/check_authenticated', function (req, res) {
 	// If session authenticated
 	if (req.session && req.session.authenticated && req.session.authenticated === true) {
-		return res.status(200).json({response: 'Authenticated'});
+		return res.status(200).json({response: 'Authenticated', username: req.session.username});
 	}
 	return res.status(400).json({response: 'Not authenticated'});
 });
@@ -277,17 +277,17 @@ function stopStream(streamKey) {
 }
 
 // Registers an account
-function register(username, password, res) {
+function register(u, p, res) {
 	// Check if username already exists
 	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
-	var inserts = ['username', 'accounts', 'username', username];
+	var inserts = ['username', 'accounts', 'username', u];
 	dbConnection.query(sql, inserts, function (error, results) {
 		if (error) throw error;
 		if (results.length != 0) {
 			return res.status(400).json({response: 'Username exists'});
 		}
 		// Hash password
-		bcrypt.hash(password, saltRounds, function (err, hash) {
+		bcrypt.hash(p, saltRounds, function (err, hash) {
 			// Generate user ID and stream key and check if already exist
 			var uid = crypto.randomBytes(8).toString('hex');
 			var streamKey = crypto.randomBytes(32).toString('hex');
@@ -300,7 +300,7 @@ function register(username, password, res) {
 				}
 				// Insert account in accounts table
 				var sql = 'INSERT INTO ?? SET ?';
-				var inserts = ['accounts', {'uid': uid, 'username': username, 'password': hash, 'stream_key': streamKey}];
+				var inserts = ['accounts', {'uid': uid, 'username': u, 'password': hash, 'stream_key': streamKey}];
 				dbConnection.query(sql, inserts, function (error, results) {
 					if (error) throw error;
 					if (results.affectedRows != 1) {
@@ -315,24 +315,24 @@ function register(username, password, res) {
 }
 
 // Logs a user in
-function login(username, password, req, res) {
+function login(u, p, req, res) {
 	// Get user ID and password hash for username
 	var sql = 'SELECT ??,?? FROM ?? WHERE ??=?';
-	var inserts = ['uid', 'password', 'accounts', 'username', username];
+	var inserts = ['uid', 'password', 'accounts', 'username', u];
 	dbConnection.query(sql, inserts, function (error, results) {
 		if (error) throw error;
 		if (results.length != 1) {
 			return res.status(400).json({response: 'Invalid username or password'});
 		}
 		// Compare sent password hash to account password hash
-		bcrypt.compare(password, results[0].password, function (err, result) {
+		bcrypt.compare(p, results[0].password, function (err, result) {
 			if (result === true) {
 				// Setup session
 				req.session.authenticated = true;
 				req.session.uid = results[0].uid;
-				req.session.username = username;
+				req.session.username = u;
 				console.log('User logged in.');
-				return res.status(200).json({response: 'Login successful'});
+				return res.status(200).json({response: 'Login successful', username: req.session.username});
 			} else {
 				return res.status(400).json({response: 'Invalid username or password'});
 			}
@@ -351,7 +351,7 @@ function logout(req, res) {
 }
 
 // Deletes an account
-function deleteAccount(password, req, res) {
+function deleteAccount(p, req, res) {
 	// Get password hash for user ID
 	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
 	var inserts = ['password', 'accounts', 'uid', req.session.uid];
@@ -361,7 +361,7 @@ function deleteAccount(password, req, res) {
 			return res.status(500).json({response: 'User ID not found'});
 		}
 		// Compare sent password hash to account password hash
-		bcrypt.compare(password, results[0].password, function (err, result) {
+		bcrypt.compare(p, results[0].password, function (err, result) {
 			if (result === true) {
 				// Delete account
 				var sql = 'DELETE FROM ?? WHERE ??=?';
@@ -449,9 +449,9 @@ function getStreams(res) {
 }
 
 // Checks if a user exists
-function checkUserExists(username, req, res) {
+function checkUserExists(u, req, res) {
 	var sql = 'SELECT ?? FROM ?? WHERE ??=?';
-	var inserts = ['username', 'accounts', 'username', username];
+	var inserts = ['username', 'accounts', 'username', u];
 	dbConnection.query(sql, inserts, function (error, results) {
 		if (error) throw error;
 		if (results.length != 1) {
@@ -462,9 +462,9 @@ function checkUserExists(username, req, res) {
 }
 
 // Checks if a user is live
-function checkUserLive(username, req, res) {
+function checkUserLive(u, req, res) {
 	for (var streamKey in streams) {
-		if (streams.hasOwnProperty(streamKey) && streams[streamKey].username === username) {
+		if (streams.hasOwnProperty(streamKey) && streams[streamKey].username === u) {
 			return res.status(200).json({response: 'User live'});
 		}
 	}

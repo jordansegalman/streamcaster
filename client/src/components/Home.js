@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PageHeader, Grid, Row, Col, Thumbnail } from 'react-bootstrap';
+import { Grid, Row, Col, Thumbnail } from 'react-bootstrap';
 import './Home.css';
 
 export default class Home extends Component {
@@ -61,7 +61,7 @@ export default class Home extends Component {
   render() {
     return (
       <div className="Home">
-        <PageHeader>Live</PageHeader>
+        <h1>Live</h1>
         <div className="streams">
           <Grid>
             <Row>

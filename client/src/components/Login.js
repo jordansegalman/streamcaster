@@ -42,7 +42,7 @@ export default class Login extends Component {
     .then(responseJson => {
       this.setState({ loading: false });
       if (responseJson.response === 'Login successful') {
-        this.props.authenticate(true);
+        this.props.authenticate(responseJson.username);
         this.props.history.push('/');
       }
     })

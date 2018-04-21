@@ -25,7 +25,7 @@ export default class Account extends Component {
     .then(responseJson => {
       if (responseJson.response === 'Logout successful') {
         this.setState({ loading: false });
-        this.props.authenticate(false);
+        this.props.deauthenticate();
         this.props.history.push('/');
       }
     })
