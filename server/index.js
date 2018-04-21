@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+var http = require('http');
 var fs = require('fs');
 var validator = require('validator');
 var bcrypt = require('bcrypt');
@@ -41,8 +42,23 @@ var dbConnection = mysql.createConnection({
 	database: process.env.DB_NAME
 });
 
+// Setup server
+var httpServer = http.createServer(app);
+
+// Setup Socket.IO
+var io = require('socket.io')(httpServer);
+io.on('connection', (socket) => {
+	socket.on('joinRoom', (room, fn) => {
+		socket.join(room);
+		fn();
+	});
+	socket.on('message', (data) => {
+		io.to(data.room).emit('message', data.message);
+	});
+});
+
 // Listen on port
-app.listen(port, function (error) {
+httpServer.listen(port, function (error) {
 	if (error) throw error;
 	console.log('Server listening on port ' + port + '.');
 });

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Grid, Row, Col } from 'react-bootstrap';
 import VideoPlayer from './VideoPlayer';
+import Chat from './Chat';
 import './Live.css';
 
 export default class Live extends Component {
@@ -91,9 +92,7 @@ export default class Live extends Component {
                     <VideoPlayer { ...videoJsOptions } />
                   </Col>
                   <Col lg={4} md={4} sm={4} xs={12}>
-                    <div id="chat">
-                      <h2>Chat</h2>
-                    </div>
+                    <Chat username={this.props.match.params.username} />
                   </Col>
                 </Row>
               </Grid>
