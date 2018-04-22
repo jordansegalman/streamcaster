@@ -1,12 +1,29 @@
-h1 {
+.Home h1 {
   text-align: center;
 }
 
-.thumbnail {
+.Home .thumbnail {
   background-color: #191919;
-  border-color: #222;
+  border-color: #222222;
+  border-width: 1px;
 }
 
-.thumbnail h3 {
+.Home .thumbnail:hover,
+.Home .thumbnail:focus {
+  border-color: #203e84 !important;
+  border-width: 1px;
+}
+
+.Home .thumbnail {
+  text-decoration: none !important;
+}
+
+.Home .thumbnail .caption {
+  color: white;
+  text-align: center;
+}
+
+.Home .thumbnail .caption:hover,
+.Home .thumbnail .caption:focus {
   color: white;
 }

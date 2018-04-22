@@ -1,8 +1,8 @@
-textarea {
+.Chat textarea {
   resize: none;
 }
 
-.panel-body {
+.Chat .panel-body {
   overflow-x: hidden;
   overflow-y: auto;
   word-wrap: break-word;

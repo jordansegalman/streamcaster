@@ -53,7 +53,8 @@ export default class Register extends Component {
 
   render() {
     return (
-      <div className="Login">
+      <div className="Register">
+        <h1>Register</h1>
         <form onSubmit={this.handleSubmit}>
           <FormGroup controlId="username" bsSize="large">
             <ControlLabel>Username</ControlLabel>

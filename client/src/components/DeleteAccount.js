@@ -53,6 +53,7 @@ export default class DeleteAccount extends Component {
   render() {
     return (
       <div className="DeleteAccount">
+        <h1>Delete Account</h1>
         <form onSubmit={this.attemptDelete}>
           <FormGroup controlId="password" bsSize="large">
             <ControlLabel>Password</ControlLabel>

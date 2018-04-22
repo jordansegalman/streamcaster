@@ -50,8 +50,8 @@ export default class Home extends Component {
 
   renderStreams(streams) {
     return streams.map((stream) =>
-      <Col lg={4} md={6} sm={6} xs={12}>
-        <Thumbnail key={stream} src={"/thumbnails/" + stream + ".png?" + this.state.date} alt={stream} href={"/live/" + stream} onClick={this.handleStreamClick}>
+      <Col lg={4} md={6} sm={6} xs={12} key={stream}>
+        <Thumbnail src={"/thumbnails/" + stream + ".png?" + this.state.date} alt={stream} href={"/live/" + stream} onClick={this.handleStreamClick}>
           <h3>{stream}</h3>
         </Thumbnail>
       </Col>

@@ -1,11 +1,89 @@
+* {
+  font-family: 'Open-Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Quicksand', sans-serif;
+}
+
 .App {
-  background: #131313;
+  background-color: #131313;
   height: 100vh;
   color: white;
+  padding-top: 50px;
+}
+
+.navbar-inverse .navbar-collapse {
+  border: none;
+  box-shadow: none;
+}
+
+.navbar-inverse .navbar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-inverse .navbar-brand img {
+  height: 40px;
 }
 
 .navbar-inverse .navbar-brand,
 .navbar-inverse .navbar-brand:hover,
 .navbar-inverse .navbar-brand:focus {
   color: white;
+}
+
+.navbar-inverse .navbar-toggle,
+.navbar-inverse .navbar-toggle:focus,
+.navbar-inverse .navbar-toggle:hover {
+  background-color: transparent;
+  border: none;
+}
+
+.navbar-inverse .navbar-nav li a {
+  transition: all .2s ease-in-out;
+}
+
+.navbar-inverse .navbar-nav > .active > a {
+  background-color: #171717;
+  color: white;
+  transition: all .2s ease-in-out;
+}
+
+.navbar-inverse .navbar-nav li a:focus,
+.navbar-inverse .navbar-nav li a:hover,
+.navbar-inverse .navbar-nav > .active > a:focus,
+.navbar-inverse .navbar-nav > .active > a:hover {
+  background-color: #171717;
+  color: white;
+  transition: all .2s ease-in-out;
+}
+
+.btn-primary {
+  background-color: #203e84;
+  border-color: #203e84;
+  transition: all .2s ease-in-out;
+}
+
+.btn-primary:focus,
+.btn-primary:hover {
+  background-color: #203e84;
+  border-color: #203e84;
+  opacity: 0.85;
+  transition: all .2s ease-in-out;
+}
+
+.btn-primary:disabled:focus,
+.btn-primary:disabled:hover {
+  background-color: #203e84;
+  border-color: #203e84;
+  opacity: 0.65;
+}
+
+.btn-primary:active:focus,
+.btn-primary:active:hover {
+  background-color: #203e84;
+  border-color: #203e84;
+  opacity: 0.65;
+  transition: all .2s ease-in-out;
 }
