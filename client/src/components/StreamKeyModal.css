@@ -10,6 +10,7 @@
 
 .StreamKeyModal .modal-body {
   background-color: #202020;
+  overflow-x: auto;
 }
 
 .StreamKeyModal .modal-footer {

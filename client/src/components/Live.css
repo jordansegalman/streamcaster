@@ -1,3 +1,7 @@
+.Live > h1 {
+  text-align: center;
+}
+
 .Live,
 .Live .container,
 .Live .row,

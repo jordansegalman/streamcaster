@@ -74,10 +74,10 @@ class App extends Component {
                         <NavItem>Account</NavItem>
                       </LinkContainer>
                     : [
-                      <LinkContainer to="/login">
+                      <LinkContainer to="/login" key="0">
                         <NavItem>Log In</NavItem>
                       </LinkContainer>,
-                      <LinkContainer to="/register">
+                      <LinkContainer to="/register" key="1">
                         <NavItem>Register</NavItem>
                       </LinkContainer>
                     ]

@@ -13,6 +13,7 @@ export default class Live extends Component {
       exists: false,
       live: false
     };
+    this.checkUserLive = this.checkUserLive.bind(this);
   }
 
   async componentDidMount() {
@@ -21,6 +22,11 @@ export default class Live extends Component {
     } catch (e) {
       console.error(e);
     }
+    this.interval = setInterval(this.checkUserLive, 10000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   checkUserExists() {
@@ -62,9 +68,10 @@ export default class Live extends Component {
     .then(response => response.json())
     .then(responseJson => {
       if (responseJson.response === 'User live') {
-        this.setState({ live: true });
+        this.setState({ live: true, loading: false });
+      } else {
+        this.setState({ live: false, loading: false });
       }
-      this.setState({ loading: false });
     })
     .catch((error) => {
       console.error(error);

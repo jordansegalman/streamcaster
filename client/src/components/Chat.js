@@ -26,7 +26,6 @@ export default class Chat extends Component {
     if (this.state.socket != null && this.state.socket.connected) {
       this.state.socket.disconnect();
       this.state.socket.off();
-      this.setState({ socket: null, loading: true });
     }
   }
 
@@ -50,7 +49,7 @@ export default class Chat extends Component {
 
   addMessage(message) {
     if (this.state.messages.length === MAX_MESSAGES) {
-      this.setState({ messages: [...(this.state.messages.splice(1, MAX_MESSAGES - 1)), message] });
+      this.setState({ messages: [...(this.state.messages.splice(0, MAX_MESSAGES - 1)), message] });
     } else {
       this.setState({ messages: [...this.state.messages, message] });
     }

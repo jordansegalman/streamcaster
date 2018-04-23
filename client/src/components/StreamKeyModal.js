@@ -68,8 +68,9 @@ export default class StreamKeyModal extends Component {
           text="View Stream Key"
           loadingText="View Stream Key"
           onClick={this.handleView}
+          key="0"
         />,
-        <Modal className="StreamKeyModal" show={this.state.show} onHide={this.handleClose}>
+        <Modal className="StreamKeyModal" show={this.state.show} onHide={this.handleClose} key="1">
           <Modal.Header>
             <Modal.Title>Stream Key</Modal.Title>
           </Modal.Header>
