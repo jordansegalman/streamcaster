@@ -10,7 +10,7 @@ export default ({
   ...props
 }) =>
   <Button
-    className={`LoadingButton ${className}`}
+    className={`LoadingButton${className}`}
     disabled={disabled || loading}
     {...props}
   >

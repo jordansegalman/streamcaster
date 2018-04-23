@@ -1,0 +1,22 @@
+.StreamKeyModal .modal-content {
+  background-color: #191919;
+  color: #ffffff;
+  border-color: #222222;
+}
+
+.StreamKeyModal .modal-header {
+  border-color: #222222;
+}
+
+.StreamKeyModal .modal-body {
+  background-color: #202020;
+}
+
+.StreamKeyModal .modal-footer {
+  display: flex;
+  border-color: #222222;
+}
+
+.StreamKeyModal .modal-footer .btn-primary {
+  margin-left: auto;
+}

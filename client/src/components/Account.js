@@ -42,24 +42,28 @@ export default class Account extends Component {
   render() {
     return (
       <div className="Account">
-        <h1>Account</h1>
-        <StreamKeyModal />
-        <LoadingButton
-          bsSize="large"
-          type="button"
-          loading={this.state.loading}
-          text="Log Out"
-          loadingText="Logging out..."
-          onClick={this.attemptLogout}
-        />
-        <Button
-          bsSize="large"
-          type="button"
-          bsStyle="danger"
-          onClick={this.handleDelete}
-        >
-          Delete Account
-        </Button>
+        <div>
+          <h1>Account</h1>
+          <StreamKeyModal />
+          <LoadingButton
+            bsSize="large"
+            block
+            type="button"
+            loading={this.state.loading}
+            text="Log Out"
+            loadingText="Logging out..."
+            onClick={this.attemptLogout}
+          />
+          <Button
+            bsSize="large"
+            block
+            type="button"
+            bsStyle="danger"
+            onClick={this.handleDelete}
+          >
+            Delete Account
+          </Button>
+        </div>
       </div>
     );
   }

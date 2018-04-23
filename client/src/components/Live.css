@@ -1,0 +1,11 @@
+.Live,
+.Live .container,
+.Live .row,
+.Live .row > #chat {
+  height: 100%;
+}
+
+.Live .row > div {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}

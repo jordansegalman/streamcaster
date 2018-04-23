@@ -53,28 +53,31 @@ export default class DeleteAccount extends Component {
   render() {
     return (
       <div className="DeleteAccount">
-        <h1>Delete Account</h1>
-        <form onSubmit={this.attemptDelete}>
-          <FormGroup controlId="password" bsSize="large">
-            <ControlLabel>Password</ControlLabel>
-            <FormControl
-              autoFocus
-              type="password"
-              value={this.state.password}
-              placeholder="Password"
-              onChange={this.handleChange}
+        <div>
+          <h1>Delete Account</h1>
+          <form onSubmit={this.attemptDelete}>
+            <FormGroup controlId="password" bsSize="large">
+              <ControlLabel>Password</ControlLabel>
+              <FormControl
+                autoFocus
+                type="password"
+                value={this.state.password}
+                placeholder="Password"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+            <LoadingButton
+              bsSize="large"
+              bsStyle="danger"
+              block
+              disabled={!this.validateForm()}
+              type="submit"
+              loading={this.state.loading}
+              text="Delete Account"
+              loadingText="Deleting account..."
             />
-          </FormGroup>
-          <LoadingButton
-            bsSize="large"
-            bsStyle="danger"
-            disabled={!this.validateForm()}
-            type="submit"
-            loading={this.state.loading}
-            text="Delete Account"
-            loadingText="Deleting account..."
-          />
-        </form>
+          </form>
+        </div>
       </div>
     );
   }

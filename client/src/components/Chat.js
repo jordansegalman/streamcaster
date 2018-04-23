@@ -86,7 +86,7 @@ export default class Chat extends Component {
         <Panel.Body>
           <div>
             {this.state.messages.map(message =>
-              <div>{message.username}: {message.message}</div>            
+              <div key={message.username + message.message + message.date}><p id="chat-username">{message.username}:</p><p id="chat-message"> {message.message}</p></div>
             )}
           </div>
         </Panel.Body>
@@ -103,6 +103,7 @@ export default class Chat extends Component {
           </FormGroup>
           <Button
             type="submit"
+            bsStyle="primary"
             disabled={!this.validateForm()}
           >
             Send

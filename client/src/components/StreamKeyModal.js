@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import LoadingButton from './LoadingButton';
+import './StreamKeyModal.css'
 
 export default class StreamKeyModal extends Component {
   constructor(props) {
@@ -57,18 +58,18 @@ export default class StreamKeyModal extends Component {
   }
 
   render() {
-    return (
-      <div>
+    return ([
         <LoadingButton
           bsSize="large"
           bsStyle="primary"
+          block
           type="button"
           loading={this.state.getLoading}
           text="View Stream Key"
           loadingText="View Stream Key"
           onClick={this.handleView}
-        />
-        <Modal show={this.state.show} onHide={this.handleClose}>
+        />,
+        <Modal className="StreamKeyModal" show={this.state.show} onHide={this.handleClose}>
           <Modal.Header>
             <Modal.Title>Stream Key</Modal.Title>
           </Modal.Header>
@@ -86,7 +87,6 @@ export default class StreamKeyModal extends Component {
             <Button bsStyle="primary" onClick={this.handleClose}>Close</Button>
           </Modal.Footer>
         </Modal>
-      </div>
-    );
+    ]);
   }
 }

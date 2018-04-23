@@ -1,11 +1,51 @@
+.Chat {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .Chat textarea {
   resize: none;
+  background-color: #101010;
+  color: #ffffff;
+  border-color: #222222;
+}
+
+.Chat .panel {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  border-color: #222222;
+  margin-bottom: 0px;
+}
+
+.Chat .panel-heading {
+  background-color: #191919;
+  color: white;
+  border-color: #222222;
 }
 
 .Chat .panel-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column-reverse;
   overflow-x: hidden;
   overflow-y: auto;
   word-wrap: break-word;
-  display: flex;
-  flex-direction: column-reverse;
+  background-color: #202020;
+}
+
+.Chat .panel-footer {
+  background-color: #191919;
+  border-color: #222222;
+}
+
+.Chat #chat-username {
+  color: #203e84;
+  display: inline;
+}
+
+.Chat #chat-message {
+  color: #ffffff;
+  display: inline;
 }

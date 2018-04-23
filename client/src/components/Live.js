@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Col } from 'react-bootstrap';
+import { Grid, Row, Col } from 'react-bootstrap';
 import VideoPlayer from './VideoPlayer';
 import Chat from './Chat';
 import './Live.css';
@@ -86,14 +86,17 @@ export default class Live extends Component {
       <div className="Live">
         {!this.state.loading && (this.state.exists
           ? this.state.live
-            ? <Row>
-                <Col lg={8} md={8} sm={8} xs={12}>
-                  <VideoPlayer { ...videoJsOptions } />
-                </Col>
-                <Col lg={4} md={4} sm={4} xs={12}>
-                  <Chat authenticated={this.props.authenticated} username={this.props.username} stream={this.props.match.params.username} />
-                </Col>
-              </Row> 
+            ? <Grid>
+                <Row>
+                  <Col lg={8} md={8} sm={7} xs={12}>
+                    <VideoPlayer { ...videoJsOptions } />
+                    <h1>{this.props.match.params.username}</h1>
+                  </Col>
+                  <Col id="chat" lg={4} md={4} sm={5} xs={12}>
+                    <Chat authenticated={this.props.authenticated} username={this.props.username} stream={this.props.match.params.username} />
+                  </Col>
+                </Row>
+              </Grid>
             : <h1>Not Live</h1>
           : <h1>Page Not Found</h1>)
         }

@@ -53,7 +53,7 @@ io.on('connection', (socket) => {
 		fn();
 	});
 	socket.on('message', (data) => {
-		io.to(data.stream).emit('message', {username: data.username, message: data.message});
+		io.to(data.stream).emit('message', {username: data.username, message: data.message, date: Date.now()});
 	});
 });
 

@@ -1,0 +1,29 @@
+.Login {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.Login input {
+  background-color: #101010;
+  border-color: #222222;
+  color: #ffffff;
+}
+
+.Login > div {
+  padding: 25px;
+  background-color: #191919;
+  border: 2px solid #222222;
+}
+
+.Login > div h1 {
+  text-align: center;
+  margin-top: 0px;
+  margin-bottom: 25px;
+}
+
+.Login > div .btn {
+  margin-top: 25px;
+}

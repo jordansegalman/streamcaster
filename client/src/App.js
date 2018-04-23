@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
@@ -70,19 +70,17 @@ class App extends Component {
               <Navbar.Collapse>
                 <Nav pullRight>
                   {this.state.authenticated
-                    ? <Fragment>
-                        <LinkContainer to="/account">
-                          <NavItem>Account</NavItem>
-                        </LinkContainer>
-                      </Fragment>
-                    : <Fragment>
-                        <LinkContainer to="/login">
-                          <NavItem>Log In</NavItem>
-                        </LinkContainer>
-                        <LinkContainer to="/register">
-                          <NavItem>Register</NavItem>
-                        </LinkContainer>
-                      </Fragment>
+                    ? <LinkContainer to="/account">
+                        <NavItem>Account</NavItem>
+                      </LinkContainer>
+                    : [
+                      <LinkContainer to="/login">
+                        <NavItem>Log In</NavItem>
+                      </LinkContainer>,
+                      <LinkContainer to="/register">
+                        <NavItem>Register</NavItem>
+                      </LinkContainer>
+                    ]
                   }
                 </Nav>
               </Navbar.Collapse>

@@ -55,37 +55,40 @@ export default class Login extends Component {
   render() {
     return (
       <div className="Login">
-        <h1>Log In</h1>
-        <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="username" bsSize="large">
-            <ControlLabel>Username</ControlLabel>
-            <FormControl
-              autoFocus
-              type="text"
-              value={this.state.username}
-              placeholder="Username"
-              onChange={this.handleChange}
+        <div>
+          <h1>Log In</h1>
+          <form onSubmit={this.handleSubmit}>
+            <FormGroup controlId="username" bsSize="large">
+              <ControlLabel>Username</ControlLabel>
+              <FormControl
+                autoFocus
+                type="text"
+                value={this.state.username}
+                placeholder="Username"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+            <FormGroup controlId="password" bsSize="large">
+              <ControlLabel>Password</ControlLabel>
+              <FormControl
+                type="password"
+                value={this.state.password}
+                placeholder="Password"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+            <LoadingButton
+              bsSize="large"
+              bsStyle="primary"
+              block
+              disabled={!this.validateForm()}
+              type="submit"
+              loading={this.state.loading}
+              text="Log In"
+              loadingText="Logging in..."
             />
-          </FormGroup>
-          <FormGroup controlId="password" bsSize="large">
-            <ControlLabel>Password</ControlLabel>
-            <FormControl
-              type="password"
-              value={this.state.password}
-              placeholder="Password"
-              onChange={this.handleChange}
-            />
-          </FormGroup>
-          <LoadingButton
-            bsSize="large"
-            bsStyle="primary"
-            disabled={!this.validateForm()}
-            type="submit"
-            loading={this.state.loading}
-            text="Log In"
-            loadingText="Logging in..."
-          />
-        </form>
+          </form>
+        </div>
       </div>
     );
   }

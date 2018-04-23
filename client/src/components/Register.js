@@ -54,46 +54,49 @@ export default class Register extends Component {
   render() {
     return (
       <div className="Register">
-        <h1>Register</h1>
-        <form onSubmit={this.handleSubmit}>
-          <FormGroup controlId="username" bsSize="large">
-            <ControlLabel>Username</ControlLabel>
-            <FormControl
-              autoFocus
-              type="text"
-              value={this.state.username}
-              placeholder="Username"
-              onChange={this.handleChange}
+        <div>
+          <h1>Register</h1>
+          <form onSubmit={this.handleSubmit}>
+            <FormGroup controlId="username" bsSize="large">
+              <ControlLabel>Username</ControlLabel>
+              <FormControl
+                autoFocus
+                type="text"
+                value={this.state.username}
+                placeholder="Username"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+            <FormGroup controlId="password" bsSize="large">
+              <ControlLabel>Password</ControlLabel>
+              <FormControl
+                type="password"
+                value={this.state.password}
+                placeholder="Password"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+            <FormGroup controlId="confirmPassword" bsSize="large">
+              <ControlLabel>Confirm Password</ControlLabel>
+              <FormControl
+                type="password"
+                value={this.state.confirmPassword}
+                placeholder="Confirm Password"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+            <LoadingButton
+              bsSize="large"
+              bsStyle="primary"
+              block
+              disabled={!this.validateForm()}
+              type="submit"
+              loading={this.state.loading}
+              text="Register"
+              loadingText="Registering..."
             />
-          </FormGroup>
-          <FormGroup controlId="password" bsSize="large">
-            <ControlLabel>Password</ControlLabel>
-            <FormControl
-              type="password"
-              value={this.state.password}
-              placeholder="Password"
-              onChange={this.handleChange}
-            />
-          </FormGroup>
-          <FormGroup controlId="confirmPassword" bsSize="large">
-            <ControlLabel>Confirm Password</ControlLabel>
-            <FormControl
-              type="password"
-              value={this.state.confirmPassword}
-              placeholder="Confirm Password"
-              onChange={this.handleChange}
-            />
-          </FormGroup>
-          <LoadingButton
-            bsSize="large"
-            bsStyle="primary"
-            disabled={!this.validateForm()}
-            type="submit"
-            loading={this.state.loading}
-            text="Register"
-            loadingText="Registering..."
-          />
-        </form>
+          </form>
+        </div>
       </div>
     );
   }

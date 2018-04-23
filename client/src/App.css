@@ -2,13 +2,16 @@
   font-family: 'Open-Sans', sans-serif;
 }
 
+html, body, #root, .App, .App > div {
+  height: 100%;
+  background-color: #131313;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Quicksand', sans-serif;
 }
 
 .App {
-  background-color: #131313;
-  height: 100vh;
   color: white;
   padding-top: 50px;
 }
@@ -59,10 +62,32 @@ h1, h2, h3, h4, h5, h6 {
   transition: all .2s ease-in-out;
 }
 
+.btn {
+  border: none;
+  transition: all .2s ease-in-out;
+}
+
+.btn:focus,
+.btn:hover {
+  border: none;
+  transition: all .2s ease-in-out;
+}
+
+.btn:disabled:focus,
+.btn:disabled:hover {
+  border: none;
+  transition: all .2s ease-in-out;
+}
+
+.btn:active:focus,
+.btn:active:hover {
+  border: none;
+  transition: all .2s ease-in-out;
+}
+
 .btn-primary {
   background-color: #203e84;
   border-color: #203e84;
-  transition: all .2s ease-in-out;
 }
 
 .btn-primary:focus,
@@ -70,7 +95,6 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #203e84;
   border-color: #203e84;
   opacity: 0.85;
-  transition: all .2s ease-in-out;
 }
 
 .btn-primary:disabled:focus,
@@ -85,5 +109,4 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #203e84;
   border-color: #203e84;
   opacity: 0.65;
-  transition: all .2s ease-in-out;
 }

@@ -1,0 +1,28 @@
+.Account {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.Account input {
+  background-color: #101010;
+  border-color: #222222;
+  color: #ffffff;
+}
+
+.Account > div {
+  padding: 25px;
+  background-color: #191919;
+  border: 2px solid #222222;
+}
+
+.Account > div h1 {
+  text-align: center;
+  margin-top: 0px;
+}
+
+.Account > div .btn {
+  margin-top: 25px;
+}
