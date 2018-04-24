@@ -20,6 +20,7 @@
 }
 
 .Chat .panel-heading {
+  flex-shrink: 0;
   background-color: #191919;
   color: white;
   border-color: #222222;
@@ -36,6 +37,10 @@
   overflow-y: auto;
   word-wrap: break-word;
   background-color: #202020;
+}
+
+.Chat .panel-body > div {
+  margin-bottom: auto;
 }
 
 .Chat .panel-footer {

@@ -2,14 +2,17 @@
 
 ## Prerequisites
 
-* Node.js
-* MySQL
-* Nginx
-* FFmpeg
+* Node.js 9.11.1
+* npm 5.8.0
+* MySQL 5.7.22
+* Nginx 1.13.12
+  * configure arguments: --with-http_ssl_module --with-http_stub_status_module --with-file-aio --with-http_v2_module --add-module=nginx-rtmp-module
+* FFmpeg 3.0.11
+  * configure arguments: --enable-gpl --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libtheora --enable-libvorbis --enable-libvpx --enable-libx264 --enable-libx265 --enable-nonfree
 
 ## Installation
 
-1. Setup MySQL
+1. Setup MySQL database
 
 ```
 CREATE DATABASE database;
@@ -28,7 +31,17 @@ npm install
 
 3. Add variables PORT, DB_HOST, DB_USER, DB_PASS, DB_NAME, COOKIE_NAME, COOKIE_SECRET, and COOKIE_DOMAIN to .env
 
+4. Create the thumbnails directory in the server root directory
+
+```
+mkdir thumbnails
+```
+
 ## Running
+
+1. Make sure Nginx and MySQL are running
+
+2. Run the Node.js server
 
 ```
 node index.js
