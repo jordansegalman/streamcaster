@@ -7,7 +7,6 @@ var validator = require('validator');
 var bcrypt = require('bcrypt');
 var session = require('express-session');
 var url = require('url');
-var morgan = require('morgan');
 
 // Load environment variables
 require('dotenv').config();
@@ -22,7 +21,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: true
 }));
-app.use(morgan('tiny'));
 
 // Setup session
 app.set('trust proxy', 1);
@@ -47,13 +45,32 @@ var httpServer = http.createServer(app);
 
 // Setup Socket.IO
 var io = require('socket.io')(httpServer);
+var socketStreams = {};
 io.on('connection', (socket) => {
+	socket.on('disconnect', () => {
+		if (socketStreams.hasOwnProperty(socket.id)) {
+			io.in(socketStreams[socket.id]).clients((error, clients) => {
+				if (error) throw error;
+				io.to(socketStreams[socket.id]).emit('updateViewers', clients.length);
+				delete socketStreams[socket.id];
+			});
+		}
+	});
 	socket.on('joinStream', (stream, fn) => {
-		socket.join(stream);
-		fn();
+		if (validateUsername(stream)) {
+			socketStreams[socket.id] = stream;
+			socket.join(stream);
+			io.in(stream).clients((error, clients) => {
+				if (error) throw error;
+				io.to(stream).emit('updateViewers', clients.length);
+				fn();
+			});
+		}
 	});
 	socket.on('message', (data) => {
-		io.to(data.stream).emit('message', {username: data.username, message: data.message, date: Date.now()});
+		if (socketStreams.hasOwnProperty(socket.id) && validateUsername(data.username) && validateMessage(data.message)) {
+			io.to(socketStreams[socket.id]).emit('message', {username: data.username, message: data.message, date: Date.now()});
+		}
 	});
 });
 
@@ -69,11 +86,23 @@ app.post('/api/start_stream', function (req, res) {
 		// If request does not contain stream key
 		return res.sendStatus(400);
 	}
+	// Validate stream key
+	if (!validateStreamKey(req.body.name)) {
+		return res.sendStatus(403);
+	}
 	startStream(req.body.name, res);
 });
 
 // Called when a stream is stopped
 app.post('/api/stop_stream', function (req, res) {
+	if (!req.body || !req.body.name) {
+		// If request does not contain stream key
+		return;
+	}
+	// Validate stream key
+	if (!validateStreamKey(req.body.name)) {
+		return;
+	}
 	if (streams.hasOwnProperty(req.body.name)) {
 		stopStream(req.body.name);
 	}
@@ -106,11 +135,11 @@ app.post('/api/login', function (req, res) {
 	}
 	// Validate username
 	if (!validateUsername(req.body.username)) {
-		return res.status(400).json({response: 'Invalid username'});
+		return res.status(400).json({response: 'Invalid username or password'});
 	}
 	// Validate password
 	if (!validatePassword(req.body.password)) {
-		return res.status(400).json({response: 'Invalid password'});
+		return res.status(400).json({response: 'Invalid username or password'});
 	}
 	login(req.body.username, req.body.password, req, res);
 });
@@ -220,6 +249,16 @@ function validateUsername(username) {
 // Validates a password
 function validatePassword(password) {
 	return !validator.isEmpty(password) && validator.isAscii(password) && validator.isLength(password, {min: 8, max: 64});
+}
+
+// Validates a stream key
+function validateStreamKey(streamKey) {
+	return !validator.isEmpty(streamKey) && validator.isHexadecimal(streamKey) && validator.isLength(streamKey, {min: 64, max: 64});
+}
+
+// Validates a message
+function validateMessage(message) {
+	return !validator.isEmpty(message) && validator.isLength(message, {min: 1, max: 512});
 }
 
 // Stream objects

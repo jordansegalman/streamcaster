@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { FormGroup, FormControl, ControlLabel, Alert } from 'react-bootstrap';
 import LoadingButton from './LoadingButton';
 import './Login.css';
 
@@ -8,9 +8,10 @@ export default class Login extends Component {
     super(props);
 
     this.state = {
-      username: "",
-      password: "",
-      loading: false
+      username: '',
+      password: '',
+      loading: false,
+      showAlert: false
     };
   }
 
@@ -26,7 +27,7 @@ export default class Login extends Component {
 
   handleSubmit = event => {
     event.preventDefault();
-    this.setState({ loading: true });
+    this.setState({ loading: true, showAlert: false });
     fetch('https://streamcaster.me/api/login', {
       method: 'POST',
       headers: {
@@ -40,14 +41,16 @@ export default class Login extends Component {
     })
     .then(response => response.json())
     .then(responseJson => {
-      this.setState({ loading: false });
+      this.setState({ loading: false, password: '' });
       if (responseJson.response === 'Login successful') {
         this.props.authenticate(responseJson.username);
         this.props.history.push('/');
+      } else if (responseJson.response === 'Invalid username or password') {
+        this.setState({ showAlert: true });
       }
     })
     .catch((error) => {
-      this.setState({ loading: false });
+      this.setState({ loading: false, password: '' });
       console.error(error);
     });
   }
@@ -77,6 +80,11 @@ export default class Login extends Component {
                 onChange={this.handleChange}
               />
             </FormGroup>
+            {this.state.showAlert && (
+              <Alert bsStyle="danger">
+                <p>Invalid username or password!</p>
+              </Alert>
+            )}
             <LoadingButton
               bsSize="large"
               bsStyle="primary"

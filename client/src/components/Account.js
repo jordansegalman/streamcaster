@@ -23,8 +23,8 @@ export default class Account extends Component {
     })
     .then(response => response.json())
     .then(responseJson => {
+      this.setState({ loading: false });
       if (responseJson.response === 'Logout successful') {
-        this.setState({ loading: false });
         this.props.deauthenticate();
         this.props.history.push('/');
       }

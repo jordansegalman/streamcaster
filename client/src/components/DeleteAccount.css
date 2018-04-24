@@ -16,6 +16,7 @@
   padding: 25px;
   background-color: #191919;
   border: 2px solid #222222;
+  border-radius: 15px;
 }
 
 .DeleteAccount > div h1 {
@@ -24,6 +25,8 @@
   margin-bottom: 25px;
 }
 
-.DeleteAccount > div .btn {
-  margin-top: 25px;
+.DeleteAccount > div .alert-danger {
+  background-color: #d32f2f;
+  border-color: #b71c1c;
+  color: #ffffff;
 }

@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { Panel, Form, FormGroup, FormControl, Button } from 'react-bootstrap';
+import { Panel, Form, FormGroup, FormControl, Button, Badge, Tooltip, OverlayTrigger } from 'react-bootstrap';
 import io from 'socket.io-client';
 import './Chat.css';
 
-const MAX_MESSAGES = 1000;
-const MAX_MESSAGE_LENGTH = 500;
+const MAX_MESSAGES = 1024;
+const MAX_MESSAGE_LENGTH = 512;
 
 export default class Chat extends Component {
   constructor(props) {
@@ -14,7 +14,8 @@ export default class Chat extends Component {
       socket: null,
       loading: true,
       messages: [],
-      message: ''
+      message: '',
+      viewers: 0
     };
   }
 
@@ -40,6 +41,9 @@ export default class Chat extends Component {
           this.setState({ loading: false });
         });
       });
+      newSocket.on('updateViewers', (v) => {
+        this.setState({ viewers: v });
+      });
       newSocket.on('message', (message) => {
         this.addMessage(message);
       });
@@ -57,16 +61,13 @@ export default class Chat extends Component {
 
   sendMessage = event => {
     event.preventDefault();
-    if (this.props.authenticated && this.props.username.length > 0 && this.state.message.length > 0 && this.state.message.length <= MAX_MESSAGE_LENGTH) {
-      this.state.socket.emit('message', { stream: this.props.stream, username: this.props.username, message: this.state.message });
+    if (this.props.authenticated && this.props.username.length > 0 && this.props.username.length <= 32 && this.validateMessage()) {
+      this.state.socket.emit('message', { username: this.props.username, message: this.state.message });
       this.setState({ message: '' });
-    } else if (!this.props.authenticated || this.props.username.length === 0) {
-      this.setState({ message: '' });
-      alert('Log in to chat.');
     }
   }
 
-  validateForm() {
+  validateMessage() {
     return this.state.message.length > 0 && this.state.message.length <= MAX_MESSAGE_LENGTH;
   }
 
@@ -77,10 +78,23 @@ export default class Chat extends Component {
   }
 
   renderChat() {
+    const viewersTooltip = (
+      <Tooltip id="viewersTooltip">
+        Viewers
+      </Tooltip>
+    );
+    const messageSendTooltip = (
+      <Tooltip id="messageSendTooltip">
+        Log in to chat
+      </Tooltip>
+    );
     return (
       <Panel>
         <Panel.Heading>
           Chat
+          <OverlayTrigger placement="left" overlay={viewersTooltip}>
+            <Badge>{this.state.viewers}</Badge>
+          </OverlayTrigger>
         </Panel.Heading>
         <Panel.Body>
           <div>
@@ -90,24 +104,33 @@ export default class Chat extends Component {
           </div>
         </Panel.Body>
         <Panel.Footer>
-        <Form onSubmit={this.sendMessage}>
-          <FormGroup controlId="message">
-            <FormControl
-              componentClass="textarea"
-              value={this.state.message}
-              placeholder="Message"
-              maxLength={MAX_MESSAGE_LENGTH}
-              onChange={this.handleChange}
-            />
-          </FormGroup>
-          <Button
-            type="submit"
-            bsStyle="primary"
-            disabled={!this.validateForm()}
-          >
-            Send
-          </Button>
-        </Form>
+          <Form onSubmit={this.sendMessage}>
+            <FormGroup controlId="message">
+              <FormControl
+                componentClass="textarea"
+                value={this.state.message}
+                placeholder="Message"
+                maxLength={MAX_MESSAGE_LENGTH}
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+            {this.props.authenticated
+              ? <Button
+                  type="submit"
+                  bsStyle="primary"
+                  disabled={!this.validateMessage()}
+                >
+                  Send
+                </Button>
+              : <OverlayTrigger placement="right" overlay={messageSendTooltip}>
+                  <Button
+                    bsStyle="primary"
+                  >
+                    Send
+                  </Button>
+                </OverlayTrigger>
+            }
+          </Form>
         </Panel.Footer>
       </Panel>
     );

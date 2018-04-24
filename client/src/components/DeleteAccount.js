@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
+import { FormGroup, FormControl, ControlLabel, Alert } from 'react-bootstrap';
 import LoadingButton from './LoadingButton';
 import './DeleteAccount.css';
 
@@ -8,8 +8,9 @@ export default class DeleteAccount extends Component {
     super(props);
 
     this.state = {
-      password: "",
-      loading: false
+      password: '',
+      loading: false,
+      showAlert: false
     };
   }
 
@@ -25,7 +26,7 @@ export default class DeleteAccount extends Component {
 
   attemptDelete = event => {
     event.preventDefault();
-    this.setState({ loading: true });
+    this.setState({ loading: true, showAlert: false });
     fetch('https://streamcaster.me/api/delete_account', {
       method: 'POST',
       headers: {
@@ -38,14 +39,16 @@ export default class DeleteAccount extends Component {
     })
     .then(response => response.json())
     .then(responseJson => {
-      this.setState({ loading: false });
+      this.setState({ loading: false, password: '' });
       if (responseJson.response === 'Account deletion successful') {
         this.props.deauthenticate();
         this.props.history.push('/');
+      } else if (responseJson.response === 'Invalid password') {
+        this.setState({ showAlert: true });
       }
     })
     .catch((error) => {
-      this.setState({ loading: false });
+      this.setState({ loading: false, password: '' });
       console.error(error);
     });
   }
@@ -66,6 +69,11 @@ export default class DeleteAccount extends Component {
                 onChange={this.handleChange}
               />
             </FormGroup>
+            {this.state.showAlert && (
+              <Alert bsStyle="danger">
+                <p>Invalid password!</p>
+              </Alert>
+            )}
             <LoadingButton
               bsSize="large"
               bsStyle="danger"

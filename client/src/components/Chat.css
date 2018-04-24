@@ -23,6 +23,9 @@
   background-color: #191919;
   color: white;
   border-color: #222222;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .Chat .panel-body {
