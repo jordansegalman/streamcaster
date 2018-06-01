@@ -1,6 +1,6 @@
 # Streamcaster
 
-**Streamcaster is a live streaming platform that anyone can sign up for to live stream whatever content they choose using popular live streaming software such as Open Broadcaster Software (OBS).** People can view these live streams and participate in chat with other viewers if they choose to sign up. The server is built primarily with Node.js and the client is built with React. Account information is stored in a MySQL database. Nginx is used as a reverse proxy for the Node.js server and to ingest RTMP streams from software like OBS. These streams are authenticated with a stream key which can be found on the account page after logging in. Once authenticated, the streams are then transcoded into multiple HLS variants of different resolution and frame rate using FFmpeg and a custom Bash script, which also periodically generates stream thumbnails. The React client integrates with the server RESTful API to get stream information, such as thumbnails, and accesses the HLS fragments on the server to display streams to viewers. Socket.IO provides real-time stream chat and viewer count.
+**Streamcaster is a live streaming platform that anyone can sign up for to live stream whatever content they choose using popular live streaming software such as Open Broadcaster Software (OBS).** People can view these live streams and participate in chat with other viewers if they choose to sign up. The server is built primarily with Node.js and the client is built with React. Account information is stored in a MySQL database. Nginx is used as a reverse proxy for the Node.js server and to ingest RTMP streams from software like OBS. These streams are authenticated with a stream key which can be found on the account page after logging in. Once authenticated, the streams are then transcoded into multiple HLS variants of different resolutions and frame rates using FFmpeg and a custom Bash script, which also periodically generates stream thumbnails. The React client integrates with the server RESTful API to get stream information, such as thumbnails, and accesses the HLS fragments on the server to display streams to viewers. Socket.IO provides real-time stream chat and viewer count.
 
 ## Server Setup Instructions
 
@@ -78,3 +78,13 @@ npm install
 ```
 npm start
 ```
+
+## Screenshots
+
+![Live](screenshots/live.png)
+
+![Home](screenshots/home.png)
+
+![Account](screenshots/account.png)
+
+![Login](screenshots/login.png)
